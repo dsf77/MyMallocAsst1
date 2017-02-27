@@ -1,63 +1,102 @@
-// NOTE: This will be a .h file & the test cases will be "main.c" arbitrarily calling this .h file
-
-
-
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h> 
+#include <string.h>
+#include "mymalloc.h"
 
 // Size of memory
-#define MEMORYBLOCKSIZE 5000 
+#define MEMORYBLOCKSIZE 5000
 
 #define Freed 1
 #define notFreed 0
 
 // Static array of chars to simulate memory
-static char myblock[MEMORYBLOCKSIZE]; 
+static char memoryBlock[MEMORYBLOCKSIZE];
 
 // Linked list structure to traverse through memory
-struct MetaData 
+typedef struct node
 {
-	struct MetaData *prev, *next; 
-	int freed; // Freed: 1, not Freed: 0
-	int size; 
-};
+  struct node * next;
+  int freedBoolean; // Freed: 1, not Freed: 0
+  size_t size;
+} node;
 
-// Pass in sizeOf to malloc, The file using this method, and the line number referencing it
-void * myMalloc(int sizeOf, char * fileNameofError, int lineNumErr)
+// Assign memory for linked list node(s)
+node * linkedList = (void *) memoryBlock;
+
+//  Initialize node parameters in linked list to appropriate size, free status, and next pointer to null 
+void initializeLinkedList()
 {
- int blnFirstMalloc = 0;
- struct MetaData * headOfMemory;
- struct MetaData * metaPtr;
-
- if(sizeof == 0)
- {
-  printf("Error: Tried to allocate 0 bytes:\n File_Name: %s\n Line_Number: %s\n",fileNameofError, lineNumErr);
- }
-
- if(blnFirstMalloc == 0)
- {
-  headOfMemory = (struct MetaData*) myblock;                     // initialize head to point to front of "myBlock"
-  headOfMemory->next = 0;                                        // initialize next to 0
-  headOfMemory->prev = 0;                                        // initialize prev to 0
-  headOfMemory->size = MEMORYBLOCKSIZE - sizeOf(struct MetaData);// Keep track of size to check for overflow
-  headOfMemory->freed = notFreed;                                // Set that the memory is no longer free
-  blnFirstMalloc = 1;                                            // Set that the memory space has been linked with MetaData
- }
-
- /*
-  DO CENTRAL
-  ALGORITHM HERE
-  FOR MALLOC
- */
+  linkedList -> size = MEMORYBLOCKSIZE - sizeof(node);
+  linkedList -> freedBoolean = 1;
+  linkedList -> next = NULL;
 }
 
-// Pass in ptr to be freed, The file calling this method, the line number referencing it, return 0 or 1 if it freed successfully or not
-int myFree(void* freeThisPtr, char * fileNameofError, int lineNumErr)
+// Pass in giveMeThisSize to malloc and return malloced
+void * mymalloc(size_t giveMeThisSize)
 {
-
+  node *prev, *curr;
+  void * malloced;
+  // Initialize linked list if not done so already
+  if(!(linkedList -> size))
+  {
+    initializeLinkedList;
+  }
+  // Get start of linked list
+  curr = linkedList;
+  // Iterate through linked list if memory permits
+  while((curr -> size) < giveMeThisSize)
+  {
+    prev = curr;
+    curr = curr -> next;
+  }
+  // Check for when there is adequate memory and return malloced
+  if((curr -> size) >= (giveMeThisSize + sizeof(node)))
+  {
+    node * temporaryNode = (void*)((char*)curr + giveMeThisSize + sizeof(node));
+    temporaryNode -> size = ((curr -> size) - giveMeThisSize)-sizeof(node);
+    temporaryNode -> freedBoolean = 1;
+    temporaryNode -> next = curr -> next;
+    // Set size, free status, and pointer to next node in current node
+    curr -> size = giveMeThisSize;
+    curr -> freedBoolean = 0;
+    curr -> next = temporaryNode;
+    // Get pointer to next available node
+    malloced = (void*)(++curr);
+  } else                // Check for insufficient amount of memory 
+  {
+    malloced = NULL;
+    printf("Error: No memory left to allocate:\n File_Name: %s\n Line_Number: %d\n", __FILE__, __LINE__);
+  }
+  return malloced;
 }
 
- 
+// Pass in ptr to be freed, pass error message when inappropriately freeing memory
+int myfree(void* freeThisPointer)
+{
+  if(((void*)memoryBlock <= freeThisPointer) && ((void*)(memoryBlock+MEMORYBLOCKSIZE) >= freeThisPointer))
+  {
+    node * curr = freeThisPointer;
+    --curr;
+    if(curr -> freedBoolean == 1) {
+      printf("Error: Repetitive free:\n File_Name: %s\n Line_Number: %d\n", __FILE__, __LINE__);
+      return;
+    }
+    curr -> freedBoolean = 1;
 
- 
+    node *prev, *curr;
+    curr = linkedList;
+    while(curr && curr -> next)
+    {
+      if(curr -> freedBoolean) && (curr -> next -> freedBoolean)
+      {
+        curr -> size += (curr -> next -> size) + sizeof(node);
+        curr -> next = curr -> next -> next;
+      }
+      prev = curr;
+      curr = curr -> next;
+    }
+  } else 
+  {
+    printf("Error: Invalid pointer:\n File_Name: %s\n Line_Number: %d\n", __FILE__, __LINE__);
+  }
+}
