@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "mymalloc1.h"
+#include "mymalloc.h"
 
 // Size of memory
 #define MEMORYBLOCKSIZE 5000
@@ -73,6 +73,7 @@ void * mymalloc(size_t giveMeThisSize)
 // Pass in ptr to be freed, pass error message when inappropriately freeing memory
 void myfree(void* freeThisPointer)
 {
+  node *prev, *curr;
   if(((void*)memoryBlock <= freeThisPointer) && ((void*)(memoryBlock+MEMORYBLOCKSIZE) >= freeThisPointer))
   {
     node * curr = freeThisPointer;
@@ -83,11 +84,11 @@ void myfree(void* freeThisPointer)
     }
     curr -> freedBoolean = 1;
 
-    node *prev, *curr;
+    
     curr = linkedList;
     while(curr && curr -> next)
     {
-      if(curr -> freedBoolean) && (curr -> next -> freedBoolean)
+      if((curr -> freedBoolean) && (curr -> next -> freedBoolean))
       {
         curr -> size += (curr -> next -> size) + sizeof(node);
         curr -> next = curr -> next -> next;

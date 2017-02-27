@@ -1,5 +1,5 @@
-#include "mymalloc1.h"
-#include "mymalloc1.c"
+#include "mymalloc.h"
+#include "mymalloc.c"
 #include <stdio.h>
 #include <time.h>
 
@@ -22,7 +22,7 @@ void main()
  // A*****************
 
  int x1;
- myFree(&x1);
+ myfree(&x1);
 
  // B1*****************
 
@@ -74,7 +74,7 @@ void main()
  
   for(index = 0; index < 1000; index++)
   {
-   ptrArray1[index] = (char*)myMalloc(sizeof(char));
+   ptrArray1[index] = (char*)mymalloc(sizeof(char));
   }
 
   for(index = 0; index < 1000; index++)
@@ -94,8 +94,8 @@ void main()
   startTime = clock();
   for(index = 0; index < 1000; index++)
   {  
-   	char* ptr = (char*)myMalloc(sizeof(char));
-    myFree(ptr);
+   	char* ptr = (char*)mymalloc(sizeof(char));
+    myfree(ptr);
   }
    endTime = clock();
    totalTime = ((double)(endTime - startTime))/CLOCKS_PER_SEC;
@@ -117,7 +117,7 @@ void main()
 
    if((randomNum == 0) && (numOfMallocs < 1000))
    {
-    ptrArray2[numOfMallocs] = (char*)myMalloc(sizeof(char));
+    ptrArray2[numOfMallocs] = (char*)mymalloc(sizeof(char));
     numOfMallocs++;
    }
 
@@ -155,7 +155,7 @@ void main()
 
    if((randomNum == 0) && (numOfMallocs < 1000))
    {
-    ptrArray3[numOfMallocs] = (char*)myMalloc(randomNumBytes * sizeof(char));
+    ptrArray3[numOfMallocs] = (char*)mymalloc(randomNumBytes * sizeof(char));
     numOfMallocs++;
    }
 
@@ -181,13 +181,13 @@ void main()
   // Fill Up memory
   for(index = 0; index < 999; index++)
   {  
-   	char* ptr = (char*)myMalloc(sizeof(char));
+   	char* ptr = (char*)mymalloc(sizeof(char));
   }
   
   // Rotate Mallocing & freeing right on the edge of memory overflow
   for(index = 0; index < 1000; index++)
   { 
-    char* ptr = (char*)myMalloc(sizeof(char));
+    char* ptr = (char*)mymalloc(sizeof(char));
   	myfree(ptr); 
   }
    endTime = clock();
@@ -204,13 +204,13 @@ void main()
   // Fill up the majority of memory
   for(index = 0; index < 900; index++)
   {  
-   	char* ptr = (char*)myMalloc(sizeof(char));
+   	char* ptr = (char*)mymalloc(sizeof(char));
   }
   
   // Rotate Mallocing & freeing right on the edge of memory overflow with a random number of bytes
   for(index = 0; index < 1000; index++)
   { 
-    char* ptr = (char*)myMalloc(randomNumBytes * sizeof(char));
+    char* ptr = (char*)mymalloc(randomNumBytes * sizeof(char));
     myfree(ptr);
     randomNumBytes = ((rand() % 256) + 1); 
   }
